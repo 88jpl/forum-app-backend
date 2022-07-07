@@ -1,4 +1,5 @@
 const express = require("express");
+const { default: mongoose } = require("mongoose");
 const { User, Thread } = require("../persist/model");
 const setUpAuth = require("./auth");
 const setUpSession = require("./session");
@@ -78,6 +79,7 @@ app.get("/thread/:id", async (req, res) => {
   res.status(200).json(thread);
 });
 
+
 app.get("/threads", async (req, res) => {
   // no authentication needed a.k.a. authorization is public/open
   let threads;
@@ -117,14 +119,16 @@ app.post("/thread", async (req, res) => {
   }
   // create with await + try/catch
   try {
+    
     let thread = await Thread.create({
       user_id: req.user.id,
       name: req.body.name,
       description: req.body.description,
       category: req.body.category,
-      upDogs: [],
-      downDogs: []
+      upDog: [req.user.id],
+      downDog: []
     });
+    console.log(thread)
     res.status(201).json(thread);
   } catch (err) {
     res.status(500).json({
@@ -134,6 +138,34 @@ app.post("/thread", async (req, res) => {
     return;
   }
 });
+
+//Add upDog
+app.post("/thread/:id/like", async (req, res) => {
+  const id = req.params.id;
+  // Is the user authenticated to vote
+  if (!req.user) {
+    res.status(401).json({ message: "unauthed" });
+    return;
+  }
+  // Has the user already voted
+  
+  // Add vote
+  let thread;
+  try{
+    thread = await Thread.findByIdAndUpdate(id,
+      {
+          $push:{
+            upDog: req.user.id,
+          },
+      },
+      );
+    } catch (err) {
+      res.status(500).json({
+        message: `error updoggin post`
+      })
+    }
+});
+
 
 app.delete("/thread/:id", async (req, res) => {
   // check if authed
