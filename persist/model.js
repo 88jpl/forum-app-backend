@@ -1,5 +1,19 @@
 const mongoose = require("mongoose");
 
+const userSchema = mongoose.Schema({
+  username: {
+    type: String,
+    match: [
+      /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/,
+      "Please fill a valid email address",
+    ],
+    required: true,
+    unique: true,
+  },
+  fullname: { type: String, required: true },
+  password: { type: String, required: true },
+});
+
 const postSchema = mongoose.Schema(
   {
     user_id: {
@@ -28,25 +42,15 @@ const threadSchema = mongoose.Schema(
     description: { type: String, required: true, default: "" },
     posts: { type: [postSchema], required: true, default: [] },
     category: { type: String, required: true, default: "" },
+    upDog: { type: [mongoose.Schema.Types.ObjectId], required: true, default:[]},
+    downDog: { type: [mongoose.Schema.Types.ObjectId], required: true, default: []}
   },
   {
     timestamps: true,
   }
 );
 
-const userSchema = mongoose.Schema({
-  username: {
-    type: String,
-    match: [
-      /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/,
-      "Please fill a valid email address",
-    ],
-    required: true,
-    unique: true,
-  },
-  fullname: { type: String, required: true },
-  password: { type: String, required: true },
-});
+
 
 const User = mongoose.model("User", userSchema);
 const Thread = mongoose.model("Thread", threadSchema);
