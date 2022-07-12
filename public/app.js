@@ -1,4 +1,4 @@
-const URL = "https://forum2022.codeschool.cloud";
+const URL = "http://localhost:8080";
 
 var app = new Vue({
     el: "#app",
@@ -150,7 +150,7 @@ var app = new Vue({
         },
         // GET /thread - get a list of all threads
         getThread: async function () {
-            let response = await fetch(URL + "/thread", {
+            let response = await fetch(URL + "/threads", {
                 credentials: "include"
             });
             

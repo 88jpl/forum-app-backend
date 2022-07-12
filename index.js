@@ -2,6 +2,7 @@ const app = require("./server/server");
 const { connect, onConnect } = require("./persist/connect");
 const config = require("./config");
 
+
 onConnect(() => {
   app.listen(config.http_port, () => {
     console.log(`serving on port ${config.http_port}`);

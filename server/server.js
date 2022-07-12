@@ -1,9 +1,11 @@
 const express = require("express");
-const { default: mongoose } = require("mongoose");
 const { User, Thread } = require("../persist/model");
 const setUpAuth = require("./auth");
 const setUpSession = require("./session");
+const cors = require("cors");
 const app = express();
+
+
 
 // tel your server to understand how to handle json
 app.use(express.json());
@@ -11,9 +13,16 @@ app.use(express.json());
 // allow serving of UI code
 app.use(express.static(`${__dirname}/../public/`));
 
+app.use(cors({origin:"http://127.0.0.1:5500"}));
+
 setUpSession(app);
 setUpAuth(app);
 // 9
+
+
+
+
+
 app.post("/users", async (req, res) => {
   try {
     let user = await User.create({
@@ -79,7 +88,6 @@ app.get("/thread/:id", async (req, res) => {
   res.status(200).json(thread);
 });
 
-
 app.get("/threads", async (req, res) => {
   // no authentication needed a.k.a. authorization is public/open
   let threads;
@@ -119,16 +127,14 @@ app.post("/thread", async (req, res) => {
   }
   // create with await + try/catch
   try {
-    
     let thread = await Thread.create({
       user_id: req.user.id,
       name: req.body.name,
       description: req.body.description,
       category: req.body.category,
-      upDog: [req.user.id],
-      downDog: []
+      upDogs: [],
+      downDogs: []
     });
-    console.log(thread)
     res.status(201).json(thread);
   } catch (err) {
     res.status(500).json({
@@ -138,34 +144,6 @@ app.post("/thread", async (req, res) => {
     return;
   }
 });
-
-//Add upDog
-app.post("/thread/:id/like", async (req, res) => {
-  const id = req.params.id;
-  // Is the user authenticated to vote
-  if (!req.user) {
-    res.status(401).json({ message: "unauthed" });
-    return;
-  }
-  // Has the user already voted
-  
-  // Add vote
-  let thread;
-  try{
-    thread = await Thread.findByIdAndUpdate(id,
-      {
-          $push:{
-            upDog: req.user.id,
-          },
-      },
-      );
-    } catch (err) {
-      res.status(500).json({
-        message: `error updoggin post`
-      })
-    }
-});
-
 
 app.delete("/thread/:id", async (req, res) => {
   // check if authed
